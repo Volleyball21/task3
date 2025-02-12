@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple React App</title>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        function ChannelList() {
+            const [channels, setChannels] = React.useState([]);
+            const [selectedChannel, setSelectedChannel] = React.useState(null);
+            const [userName, setUserName] = React.useState("");
+
+            React.useEffect(() => {
+                // Fetch list of channels
+                fetch("http://vm146.rz.uos.de/hub/channels") // Replace with a real API
+                    .then(response => response.json())
+                    .then(data => setChannels(data.channels))
+                    .catch(error => console.error("Error fetching channels:", error));
+            }, []);
+
+            function handleChannelClick(channel) {
+                setSelectedChannel(channel);
+                setUserName(""); // Reset the username input when a new channel is selected
+            }
+
+            function handleJoinChannel(event) {
+                event.preventDefault();
+                if (!selectedChannel) return;
+
+                console.log(`Joining channel: ${selectedChannel.endpoint}, User: ${userName}`);
+
+                fetch(selectedChannel.endpoint, {
+                    headers: { 'Authorization': `authkey ${selectedChannel.authKey}` }
+                })
+                .then(response => response.json())
+                .then(data => console.log("Channel Data:", data))
+                .catch(error => console.error("Error fetching channel data:", error));
+            }
+
+            return (
+                <div>
+                    <h2>Channel List</h2>
+                    <ul>
+                        {channels.map((channel, index) => (
+                            <li 
+                                key={`${channel.endpoint}-${index}`} 
+                                onClick={() => handleChannelClick(channel)}
+                                style={{ cursor: "pointer", marginBottom: "10px", color: "blue" }}
+                            >
+                                {channel.name}
+                            </li>
+                        ))}
+                    </ul>
+
+                    {selectedChannel && (
+                        <form onSubmit={handleJoinChannel}>
+                            <h3>Join {selectedChannel.name}</h3>
+                            <input 
+                                type="text" 
+                                placeholder="Enter your name..." 
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                required
+                            />
+                            <button type="submit">Join Channel</button>
+                        </form>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(
+            <div>
+                <h1>Chat client: List of channels</h1>
+                <ChannelList />
+            </div>,
+            document.getElementById('root')
+        );
+    </script>
+</body>
+</html>
