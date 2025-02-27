@@ -1,0 +1,138 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  background-color: #F5E8D0;
+}
+
+
+.container {
+  display: flex;
+  height: 100%; 
+}
+/* Sidebar with channels */
+.sidebar {
+  width: 220px; 
+  background: #D7BEA8;
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  overflow-y: auto; 
+  height: 100vh;
+}
+
+ /* Main content for chat */
+ .channel-box {
+  padding: 12px;
+  cursor: pointer;
+  background-color: #FFF8F0;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.channel-box:hover {
+  background-color: #E8DED3;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Main content for chat */
+.chat-box {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #F5E8D0;
+  padding: 10px;
+}
+
+/* Message List */
+.messages {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+
+.message {
+  margin: 15px 0;
+  background-color: #FFDAC1;
+  padding: 10px;
+  border-radius: 5px;
+  max-width: 80%;
+  word-wrap: break-word;
+  margin-left: 20px;
+}
+.message.user {
+  background-color: #A67C52;
+  align-self: flex-end;
+  color: white;
+}
+
+/* Name input section */
+.name-input {
+  display: flex;
+  padding: 10px;
+  background: #F3EDE2;
+  border-top: 1px solid #ccc;
+  /* Sticky position to keep at top */
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
+}
+.name-input input {
+  padding: 8px;
+  margin-right: 10px;
+  flex-grow: 1;
+}
+.name-input button {
+  padding: 8px 16px;
+  background-color: #C9A77D;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.name-input button:hover {
+  background-color: #90A4AE;
+}
+
+/* Message input section */
+.message-input {
+  display: flex;
+  padding: 10px;
+  background: #F3EDE2;
+  border-top: 1px solid #ccc;
+  /* Sticky position to keep at the bottom */
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 10;
+}
+.message-input input {
+  padding: 8px;
+  margin-right: 10px;
+  flex-grow: 1;
+}
+.message-input button {
+  padding: 8px 16px;
+  background-color: #C9A77D;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.message-input button:hover {
+  background-color: #90A4AE;
+}
