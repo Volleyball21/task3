@@ -120,7 +120,11 @@
           ) : (
             messages.map((message, index) => (
               <div key={index} className="message">
-                {`${message.sender}: ${message.content}`}
+                <div style={{ fontWeight: 'bold' }}>{message.sender}</div>
+                <div>{message.content}</div>
+                <div style={{ fontSize: 'small', color: 'gray' }}>
+                  {new Date(message.timestamp).toLocaleString()}
+                </div>
               </div>
             ))
           )}
