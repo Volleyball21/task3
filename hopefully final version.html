@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Interface</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    let username = '';
+
+    const HUB_URL = 'http://vm146.rz.uni-osnabrueck.de/hub';
+    const HUB_AUTHKEY = 'Crr-K24d-2N';
+
+    function App() {   //main tag of the program
+      const [channels, setChannels] = React.useState([]); //channels are set as a constant
+      const [selectedChannelId, setSelectedChannelId] = React.useState(null); //selected channel is set as a constant
+      const [messages, setMessages] = React.useState([]); //messages are set as a constant
+      const [messageContent, setMessageContent] = React.useState("");  //message content is set as a constant
+
+      React.useEffect(() => { //fetches channels from the hub
+        fetch(HUB_URL + '/channels')
+          .then(response => response.json())
+          .then(data => setChannels(data.channels))
+          .catch(error => console.error('Error fetching channels:', error));
+      }, []);
+
+      React.useEffect(() => { //fetches messages from the selected channel
+        let intervalId;
+
+        if (selectedChannelId !== null) { //if a channel is selected, messages are fetched
+          fetchMessages(selectedChannelId);
+          intervalId = setInterval(() => { //messages are fetched every 3 seconds
+            fetchMessages(selectedChannelId);
+          }, 3000);
+
+          return () => clearInterval(intervalId);
+        }
+      }, [selectedChannelId, channels]);
+
+      const handleChannelClick = (channelIndex) => { //if a channel is clicked, the channelIndex is set as the selected channel
+        setSelectedChannelId(channelIndex);
+        setMessages([]);
+      };
+
+      const fetchMessages = (channelIndex) => { //fetches messages from the selected channel (the one with channelIndex as an index)
+        if (channels.length > 0) {
+          fetch(channels[channelIndex].endpoint, {
+            method: 'GET',
+            headers: {
+              'Authorization': `authkey ${channels[channelIndex].authkey}`
+            },
+          })
+            .then(response => response.json())
+            .then(data => setMessages(data))
+            .catch(error => console.error('Error fetching messages:', error));
+        }
+      };
+
+      const sendMessage = () => { //if no channel or name is selected, an alert is shown
+        if (selectedChannelId == null || username === '') {
+          alert('Please select a channel or set your name first!');
+          return;
+        }
+
+        const currentMessage = messageContent; // New Stuff to Store the current message
+
+        setMessageContent(""); // constant messageContent is cleared to prevent double posting
+
+        fetch(channels[selectedChannelId].endpoint, { //fetch messages to post a new one
+          method: 'POST',
+          headers: {
+            'Authorization': `authkey ${channels[selectedChannelId].authkey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ //messages are turned to JSON
+            content: currentMessage, 
+            sender: username,
+            timestamp: new Date().toISOString()
+          })
+        })
+          .then(response => response.json())
+          .then(newMessage => {
+            setMessages(prevMessages => [...prevMessages, newMessage]); //constant messages is updated
+          })
+          .catch(error => console.error('Error sending message:', error));
+      };
+      //return of app includes all the main app components that can be changed by react
+      return (
+        <div className="container">
+          <div className="sidebar">
+            <ChannelList channels={channels} onChannelClick={handleChannelClick} /> <!--ChannelList tag is inserted into the div-->
+          </div>
+          <div className="chat-box">
+            <div className="name-input">
+              <input
+                type="text"
+                id="username"
+                placeholder="Enter your name"
+                onKeyDown={(e) => { if (e.key === 'Enter') setName(); }} //inputs can be set by pressing enter (or by clicking the button)
+              />
+              <button id="setNameButton" onClick={setName}>Set Name</button>
+            </div>
+            {/* ShowMessage tag is inserted into the div */}
+            <ShowMessage messages={messages} />  
+            <div className="message-input">
+              <input
+                type="text"
+                id="messageInput"
+                placeholder="Type a message"
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }} 
+              />
+              <button id="sendButton" onClick={sendMessage}>Send</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+
+    function ShowMessage({ messages }) {
+      //display messages in the chatbox
+      return (
+        <div id="messages">
+          {messages.length === 0 ? (
+            //if no messages are loaded, display this message
+            <p>Please select a channel</p>
+          ) : (
+            messages.map((message, index) => (
+              <div key={index} className="message">
+                <div style={{ fontWeight: 'bold' }}>{message.sender}</div>
+                <div>{message.content}</div>
+                <div style={{ fontSize: 'small', color: 'gray' }}>
+                  {new Date(message.timestamp).toLocaleString()}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      );
+    }
+
+
+
+    function setName() {
+      //the constant nameInput is set when the user types in the input field
+      const nameInput = document.getElementById('username');
+      username = nameInput.value;
+    }
+
+    function ChannelList({ channels, onChannelClick }) {
+      //displays the channellist in the sidebar
+      return (
+        <div id="channels-list">
+          {channels.length === 0 ? (
+            <p>Loading channels...</p>
+          ) : ( //if channels are loaded, display them
+            channels.map((channel, index) => (
+              <div key={index} className="channel-box" onClick={() => onChannelClick(index)}>
+                {channel.name}
+              </div>
+            ))
+          )}
+        </div>
+      );
+    }
+
+    //main program starts here
+    ReactDOM.render(
+      <App />,
+      document.getElementById('root')
+    );
+  </script>
+</body>
+</html>
