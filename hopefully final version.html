@@ -96,7 +96,7 @@
       return (
         <div className="container">
           <div className="sidebar">
-            <ChannelList channels={channels} onChannelClick={handleChannelClick} /> <!--ChannelList tag is inserted into the div-->
+            <ChannelList channels={channels} onChannelClick={handleChannelClick} /> 
           </div>
           <div className="chat-box">
             <div className="name-input">
@@ -108,7 +108,7 @@
               />
               <button id="setNameButton" onClick={setName}>Set Name</button>
             </div>
-            {/* ShowMessage tag is inserted into the div */}
+            
             <ShowMessage messages={messages} />  
             <div className="message-input">
               <input
